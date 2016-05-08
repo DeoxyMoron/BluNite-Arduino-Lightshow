@@ -1,10 +1,6 @@
 void setup(){
   Serial.begin(9600);
-  pinMode(13,OUTPUT);
 }
-char buffer[7];
-byte inByte=0;
-int pointer = 0;
 
 void loop(){
   //while (Serial.available()){
@@ -21,6 +17,9 @@ void loop(){
       if (code==4){
          shortLight(1000); 
       }
+      
+      
+      
       Serial.println(code);
     }
   } 
