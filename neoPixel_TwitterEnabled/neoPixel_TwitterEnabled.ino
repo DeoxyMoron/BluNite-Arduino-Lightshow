@@ -94,12 +94,17 @@ void loop() {
   //blueRainbow(100);
 
   //blueRainbow(100);
-  //bluePersonality(10,strip.numPixels(),30,0);
-  blueTetris();
+  //blueMoon(1,strip.numPixels(),50,0);
+  //stepUp(navy_blue,15);
+
+  //randomBlue(100);
+  randomBlueAlt(5);
+  
+  //blueTetris();
 }
 
 
-//110-185
+//110-185 COLOR RANGE
 void blueRainbow(uint8_t wait) {
   uint16_t i, j;
 
@@ -120,6 +125,63 @@ void blueRainbow(uint8_t wait) {
     delay(wait);
   }
 }
+
+void stepUp(uint32_t c, int wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+
+    strip.setPixelColor(i+3, c);
+    strip.show();
+    delay(wait);
+    
+    strip.setPixelColor(i+3, strip.Color(0,0,0));
+    strip.show();
+    
+    strip.setPixelColor(i+2, c);
+    strip.show();
+    delay(wait);
+    
+    strip.setPixelColor(i+2, strip.Color(0,0,0));
+    strip.show();
+
+    strip.setPixelColor(i+1, c);
+    strip.show();
+    delay(wait);
+
+    strip.setPixelColor(i+1, strip.Color(0,0,0));
+    strip.show();
+  }
+}
+
+void randomBlue(int wait) {
+
+  strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
+  strip.show();
+  delay(wait);
+
+  strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
+  strip.show();
+  delay(wait);
+  
+}
+
+void randomBlueAlt(int wait) {
+
+  for (int i=0; i<random(1,5);i++){
+    strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
+    strip.show();
+    delay(wait);
+  }
+
+
+  for (int i=0; i<random(1,5);i++){
+    strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
+    strip.show();
+    delay(wait);
+  }
+
+  
+}
+
 
 void allOn(uint32_t c, int wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
@@ -149,11 +211,35 @@ void colorfulPersonalityIncreasing(int delayTime){
   }
 }
 
+void blueMoon(int width, int endLight, int delayTimeOn, int delayTimeOff) {
+  //Mode suggestion:
+  //Cycle through all the lights
+  int x = 1;
+  for(int j=110; j<155; j++) {
+    for(uint16_t i=0; i<endLight; i++) {
+      //strip.setPixelColor(((i) & 30)%30, strip.Color(0,0,0));
+      //strip.show();
+  
+      /*if (i-1<0){
+        i+=strip.numPixels();
+      }
+      */
+      strip.setPixelColor((i-1+strip.numPixels()) % strip.numPixels(), strip.Color(0,0,0));
+  
+      
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+  
+      Serial.println(i);
+      strip.show();
+      delay(delayTimeOn);
+    }
+  }
+
+}
 
 void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff) {
   //Mode suggestion:
     // should make optional constructors
-  int x =0;
   int previousLight = 0;
   int currentLight = 0;
 
@@ -170,6 +256,7 @@ void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff)
 
     //Turn previous light off
     strip.setPixelColor(previousLight, strip.Color(0,0,0));
+    Serial.println((i-1) & 30);
     strip.show();
     delay(delayTimeOff);
     
