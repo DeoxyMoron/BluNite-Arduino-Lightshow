@@ -28,6 +28,7 @@ void setup() {
 
   Serial.begin(9600);
   strip.begin();
+  strip.setBrightness(125);
   strip.show(); // Initialize all pixels to 'off'
 }
 
@@ -35,6 +36,38 @@ void setup() {
 int delayTime = 0;
 int rawAnalog = 0;
 int mode = 0;
+
+//Shades of Blue
+uint32_t midnight_blue = strip.Color(25, 25, 112);
+uint32_t navy_blue = strip.Color(0, 0, 128);
+uint32_t dark_blue = strip.Color(0, 0, 139);
+uint32_t ucsb = strip.Color(0, 70, 139);
+uint32_t pigment_blue = strip.Color(51, 51, 153);
+uint32_t egyptian_blue = strip.Color(16, 52, 166);
+uint32_t cerulean = strip.Color(0, 123, 167);
+uint32_t liberty = strip.Color(84, 90, 167);
+uint32_t cobalt = strip.Color(0, 71, 171);
+uint32_t munsell_blue = strip.Color(0, 147, 175);
+uint32_t steel_blue = strip.Color(70, 130, 180);
+uint32_t baby_blue = strip.Color(137, 207, 240);
+uint32_t cerulean2 = strip.Color(0, 63, 255);
+uint32_t blue = strip.Color(0,0,255);
+uint32_t azure = strip.Color(0, 127, 255);
+uint32_t cyan = strip.Color(0, 255, 255);
+
+uint32_t blueShades[] = {midnight_blue, navy_blue, dark_blue, ucsb, pigment_blue, egyptian_blue, cerulean,
+                         liberty, cobalt, munsell_blue, steel_blue, baby_blue, cerulean2, blue, azure, cyan};
+
+uint32_t red = strip.Color(255,0,0);
+uint32_t orange = strip.Color(255,55,0);
+uint32_t yellow = strip.Color(255,255,0);
+uint32_t green = strip.Color(0,255,0);
+
+uint32_t purple = strip.Color(255,0,255);
+
+uint32_t rainbowArray[] = {red, orange, yellow, green, blue, purple};
+String rainbowLabels[] = {"red", "orange", "yellow", "green", "blue", "PURPLE"};
+
 void loop() {
   //Receive inputs from serial connection and
   // change mode accordingly, otherwise do default mode
@@ -46,47 +79,104 @@ void loop() {
      //Check for code marker
      
        if (mode == 1){
-       tetris();  
-         
+          tetris();  
        }
-       
-     }
-     
+     } 
   }
   
   //Default behavior
-  colorfulPersonalityPart1();
+  //colorfulPersonalityPart1();
 
+  //colorfulPersonalityIncreasing(20);
+  //colorfulPersonalityPart2(1, 30, 50, 0);
+  //colorfulPersonalityPart1();
+
+  //shadesOfBlue(10);
+  blueRainbow(100);
+
+  //for (int i = 0;i<15; i++){
+  //  allOn(blueShades[i],1000);
+  //
+  //allOn(ews,5000);
 }
 
-//
 
-uint32_t red = strip.Color(255,0,0);
-uint32_t orange = strip.Color(255,55,0);
-uint32_t yellow = strip.Color(255,255,0);
-uint32_t green = strip.Color(0,255,0);
-uint32_t blue = strip.Color(0,0,255);
-uint32_t purple = strip.Color(255,0,255);
 
-uint32_t rainbowArray[] = {red, orange, yellow, green, blue, purple};
-String rainbowLabels[] = {"red", "orange", "yellow", "green", "blue", "PURPLE"};
+void blueRainbow(uint8_t wait) {
+  uint16_t i, j;
 
-//int myPins[] = {2, 4, 8, 3, 6};
+  for(j=110; j<155; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+
+      Serial.println(i+j);
+    }
+    strip.show();
+    delay(wait);
+  }
+  for(j=155; j>110; j--) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void allOn(uint32_t c, int wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
+  strip.show();
+  delay(wait);
+}
 
 void tetris(){
   //when light reaches the end, it stays lit
-
   for (int i = strip.numPixels(); i>0; i--){
      colorfulPersonalityPart2(1,i,20,0);
   }
 }
 
-void colorfulPersonalityIncreasing(){
-
+void colorfulPersonalityIncreasing(int delayTime){
   for (int i =0; i<strip.numPixels();i++){
-  colorfulPersonalityPart2(i,strip.numPixels(),100,0);
+  colorfulPersonalityPart2(i,strip.numPixels(),delayTime,0);
   }
+}
 
+
+void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff) {
+  //Mode suggestion:
+    // should make optional constructors
+  int x =0;
+  int previousLight = 0;
+  int currentLight = 0;
+
+  //Cycle through all the lights
+  for(uint16_t i=0; i<endLight; i++) {
+    // If done cycling through list, reset
+    if (x>5){
+      x=0;
+    }
+
+    currentLight = i;
+    previousLight = currentLight-width;
+
+    if (previousLight<0){
+      previousLight+=endLight;
+    }
+
+    //Turn previous light off
+    strip.setPixelColor(previousLight, strip.Color(0,0,0));
+    strip.show();
+    delay(delayTimeOff);
+    
+    strip.setPixelColor(currentLight, rainbowArray[x]);
+    
+    x++;
+    strip.show();
+    delay(delayTimeOn);
+  }
 }
 
 void colorfulPersonalityPart2(int width, int endLight, int delayTimeOn, int delayTimeOff) {
@@ -116,60 +206,17 @@ void colorfulPersonalityPart2(int width, int endLight, int delayTimeOn, int dela
     delay(delayTimeOff);
     
     strip.setPixelColor(currentLight, rainbowArray[x]);
-
     
-
     x++;
     strip.show();
     delay(delayTimeOn);
   }
-  
-}
-
-void colorfulPersonalityPart3(int lights) {
-  //Mode suggestion:
-    // Building up
-  int x =0;
-
-  //Cycle through all the lights
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-
-    Serial.println("----");
-    
-    // If done cycling through list, reset
-    if (x>5){
-      x=0;
-    }
-
-    //if 
-    int prev_i = i-3;
-    if (prev_i<0){
-      prev_i=strip.numPixels()-3;
-    }
-
-    
-    
-    strip.setPixelColor(i-3, strip.Color(0,0,0));
-
-    
-    strip.setPixelColor(i, rainbowArray[x]);
-    Serial.print(i);
-    Serial.print(" - on - ");
-    Serial.println(rainbowLabels[x]);
-    
-
-    x++;
-    strip.show();
-    delay(100);
-  }
-  
 }
 
 void colorfulPersonalityPart1() {
   int x =0;
   for(uint16_t i=0; i<strip.numPixels(); i++) {
     //Cycle through all the lights (0-30)
-
     //Cycle through all the colors and reset at 6
     if (x>5){
       x=0;
@@ -183,8 +230,6 @@ void colorfulPersonalityPart1() {
   }
   //delay(1000000);
 }
-
-
 
 void colorWipe_Forward(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<strip.numPixels(); i++) {
@@ -219,6 +264,9 @@ void rainbow(uint8_t wait) {
   for(j=0; j<256; j++) {
     for(i=0; i<strip.numPixels(); i++) {
       strip.setPixelColor(i, Wheel((i+j) & 255));
+      Serial.print((i+j));
+      Serial.print("----");
+      Serial.println((i+j) & 255);
     }
     strip.show();
     delay(wait);
