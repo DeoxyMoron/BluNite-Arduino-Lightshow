@@ -91,17 +91,15 @@ void loop() {
   //colorfulPersonalityPart2(1, 30, 50, 0);
   //colorfulPersonalityPart1();
 
-  //shadesOfBlue(10);
-  blueRainbow(100);
+  //blueRainbow(100);
 
-  //for (int i = 0;i<15; i++){
-  //  allOn(blueShades[i],1000);
-  //
-  //allOn(ews,5000);
+  //blueRainbow(100);
+  //bluePersonality(10,strip.numPixels(),30,0);
+  blueTetris();
 }
 
 
-
+//110-185
 void blueRainbow(uint8_t wait) {
   uint16_t i, j;
 
@@ -138,6 +136,13 @@ void tetris(){
   }
 }
 
+void blueTetris(){
+  //when light reaches the end, it stays lit
+  for (int i = strip.numPixels(); i>0; i--){
+     bluePersonality(1,i,20,0);
+  }
+}
+
 void colorfulPersonalityIncreasing(int delayTime){
   for (int i =0; i<strip.numPixels();i++){
   colorfulPersonalityPart2(i,strip.numPixels(),delayTime,0);
@@ -155,9 +160,6 @@ void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff)
   //Cycle through all the lights
   for(uint16_t i=0; i<endLight; i++) {
     // If done cycling through list, reset
-    if (x>5){
-      x=0;
-    }
 
     currentLight = i;
     previousLight = currentLight-width;
@@ -171,9 +173,8 @@ void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff)
     strip.show();
     delay(delayTimeOff);
     
-    strip.setPixelColor(currentLight, rainbowArray[x]);
-    
-    x++;
+    strip.setPixelColor(i, Wheel((i+110) & 255));
+
     strip.show();
     delay(delayTimeOn);
   }
