@@ -68,6 +68,9 @@ uint32_t purple = strip.Color(255,0,255);
 uint32_t rainbowArray[] = {red, orange, yellow, green, blue, purple};
 String rainbowLabels[] = {"red", "orange", "yellow", "green", "blue", "PURPLE"};
 
+
+#define ARRAYSIZE(x) (sizeof(x)/sizeof(*x))
+
 void loop() {
   //Receive inputs from serial connection and
   // change mode accordingly, otherwise do default mode
@@ -93,153 +96,43 @@ void loop() {
 
   //blueRainbow(100);
 
-  //blueRainbow(100);
-  //blueMoon(1,strip.numPixels(),50,0);
-  //stepUp(navy_blue,15);
+  //blueMoon(1,strip.numPixels(),100);
+  //stepUp(navy_blue,10);
 
-  //randomBlue(100);
-  randomBlueAlt(5);
+  //randomBlue(15);
+  //randomBlueAlt(5);
   
-  //blueTetris();
-}
-
-
-//110-185 COLOR RANGE
-void blueRainbow(uint8_t wait) {
-  uint16_t i, j;
-
-  for(j=110; j<155; j++) {
-    for(i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel((i+j) & 255));
-
-      Serial.println(i+j);
-    }
-    strip.show();
-    delay(wait);
-  }
-  for(j=155; j>110; j--) {
-    for(i=0; i<strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel((i+j) & 255));
-    }
-    strip.show();
-    delay(wait);
-  }
-}
-
-void stepUp(uint32_t c, int wait) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-
-    strip.setPixelColor(i+3, c);
-    strip.show();
-    delay(wait);
-    
-    strip.setPixelColor(i+3, strip.Color(0,0,0));
-    strip.show();
-    
-    strip.setPixelColor(i+2, c);
-    strip.show();
-    delay(wait);
-    
-    strip.setPixelColor(i+2, strip.Color(0,0,0));
-    strip.show();
-
-    strip.setPixelColor(i+1, c);
-    strip.show();
-    delay(wait);
-
-    strip.setPixelColor(i+1, strip.Color(0,0,0));
-    strip.show();
-  }
-}
-
-void randomBlue(int wait) {
-
-  strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
-  strip.show();
-  delay(wait);
-
-  strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
-  strip.show();
-  delay(wait);
+  //blueTetris(10, 300);
+  blueTetrisAlt();
   
+  //bluePersonality(1, 30, 20, 20);
+  //bluePersonalityAlt(1, 30, 20);
+
+  /*int whatever[] = {12, 53, 44};
+  Serial.println(whatever[-1]);*/
 }
 
-void randomBlueAlt(int wait) {
-
-  for (int i=0; i<random(1,5);i++){
-    strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
-    strip.show();
-    delay(wait);
-  }
-
-
-  for (int i=0; i<random(1,5);i++){
-    strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
-    strip.show();
-    delay(wait);
-  }
-
-  
-}
-
-
-void allOn(uint32_t c, int wait) {
-  for(uint16_t i=0; i<strip.numPixels(); i++) {
-    strip.setPixelColor(i, c);
-  }
-  strip.show();
-  delay(wait);
-}
-
-void tetris(){
-  //when light reaches the end, it stays lit
-  for (int i = strip.numPixels(); i>0; i--){
-     colorfulPersonalityPart2(1,i,20,0);
-  }
-}
-
-void blueTetris(){
-  //when light reaches the end, it stays lit
-  for (int i = strip.numPixels(); i>0; i--){
-     bluePersonality(1,i,20,0);
-  }
-}
-
-void colorfulPersonalityIncreasing(int delayTime){
-  for (int i =0; i<strip.numPixels();i++){
-  colorfulPersonalityPart2(i,strip.numPixels(),delayTime,0);
-  }
-}
-
-void blueMoon(int width, int endLight, int delayTimeOn, int delayTimeOff) {
-  //Mode suggestion:
-  //Cycle through all the lights
-  int x = 1;
+void blueMoon(int width, int endLight, int delayTime) {
+  //Cycle through all the lights,
+  // Change color based on color wheel
   for(int j=110; j<155; j++) {
-    for(uint16_t i=0; i<endLight; i++) {
-      //strip.setPixelColor(((i) & 30)%30, strip.Color(0,0,0));
-      //strip.show();
-  
-      /*if (i-1<0){
-        i+=strip.numPixels();
-      }
-      */
-      strip.setPixelColor((i-1+strip.numPixels()) % strip.numPixels(), strip.Color(0,0,0));
-  
-      
-      strip.setPixelColor(i, Wheel((i+j) & 255));
-  
-      Serial.println(i);
+    for(int i=0; i<endLight; i++) {
+      //Turn i-1 light off
+      strip.setPixelColor(arrayMap(i-1,endLight), strip.Color(0,0,0));
       strip.show();
-      delay(delayTimeOn);
+
+      //Turn i on
+      strip.setPixelColor(arrayMap(i,endLight), Wheel((i+j) & 255));
+      strip.show();
+      delay(delayTime);
     }
   }
-
 }
 
-void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff) {
-  //Mode suggestion:
-    // should make optional constructors
+void bluePersonality(int width, int endLight, int delayTime) {
+  //Cycles through lights using alternate algorithm, better for leaving behind
+  // lights for use in the tetris mode, due to the initial condition of
+  // setting previousLight as 0;
   int previousLight = 0;
   int currentLight = 0;
 
@@ -256,14 +149,194 @@ void bluePersonality(int width, int endLight, int delayTimeOn, int delayTimeOff)
 
     //Turn previous light off
     strip.setPixelColor(previousLight, strip.Color(0,0,0));
-    Serial.println((i-1) & 30);
     strip.show();
-    delay(delayTimeOff);
-    
-    strip.setPixelColor(i, Wheel((i+110) & 255));
+    delay(delayTime);
 
+    //Turn current light on
+    strip.setPixelColor(i, Wheel((i+110) & 255));
+    strip.show();
+    delay(delayTime);
+  }
+}
+
+void blueTetris(int delayTime, int delayTime2){
+  //Animation 1: Building up
+  for (int i = strip.numPixels(); i>0; i--){
+    //the ending light decreases, which leaves the previous endPoint remaining lit
+     bluePersonality(1,i,delayTime);
+  }
+
+  //Animation 2: Flash and Disappear
+  delay(delayTime2);
+  allOn(0, delayTime2);
+  allOn(steel_blue, delayTime2);
+  allOn(0, delayTime2);
+  allOn(steel_blue, delayTime2);
+}
+
+void blueTetrisAlt(){
+  //when light reaches the end, it stays lit
+  int width = 1;
+  int delayTime = 5;
+  for (int k = strip.numPixels(); k>0; k--){
+    int previousLight = 0;
+    int currentLight = 0;
+    int endLight = k;
+  
+    //Cycle through all the lights
+    for(uint16_t i=0; i<endLight; i++) {
+      // If done cycling through list, reset
+      currentLight = i;
+      previousLight = currentLight-width;
+  
+      if (previousLight<0){
+        previousLight+=endLight;
+      }
+  
+      //Turn previous light off
+      strip.setPixelColor(previousLight, strip.Color(0,0,0));
+      strip.show();
+      delay(delayTime);
+  
+      //Turn current light on
+      strip.setPixelColor(i, Wheel((i+110) & 255));
+      strip.show();
+      delay(delayTime);
+    }
+
+    delay(100);
+    //Change color of the static lights
+    for (int m = strip.numPixels(); m >= endLight-2; m--){
+      strip.setPixelColor(m, Wheel((k+m+endLight+255) & 255));
+      Serial.print(endLight);
+      Serial.print("---");
+      Serial.println(m);
+    }
+    delay(100);
+  }
+ delay(2000);
+
+ for (int m = strip.numPixels(); m >=0; m--){
+  strip.setPixelColor(m, Wheel((m+0+255) & 255));
+}
+  
+}
+
+
+int arrayMap(int n){
+  //Simplifies the modulo operations
+  return (n+strip.numPixels()) % strip.numPixels();
+}
+
+int arrayMap(int n, int a){
+  //Simplifies the modulo operations
+  return (n+a) % a;
+}
+
+//110-185 COLOR RANGE
+void blueRainbow(uint8_t wait) {
+  //Adapted from rainbow(), limiting it to the blue portion of the color wheel
+  //Goes back and forth for fluid motion
+  uint16_t i, j;
+
+  for(j=110; j<155; j++) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+  for(j=155; j>110; j--) {
+    for(i=0; i<strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+
+void stepUp(uint32_t c, int wait) {
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    for (int k=3; k>0; k--){
+      strip.setPixelColor(arrayMap(i+k), c);
+      strip.show();
+      delay(wait);
+      
+      strip.setPixelColor(arrayMap(i+k), strip.Color(0,0,0));
+      strip.show();
+    }
+  }
+}
+
+void randomBlue(int wait) {
+  //Turns on a random light using a random blue tint from the blueshades array
+  //Turns off a random light
+  strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
+  strip.show();
+  delay(wait);
+
+  strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
+  strip.show();
+  delay(wait);
+}
+
+void randomBlueAlt(int wait) {
+  //Slightly different from randomBlue, turns on a random number of lights from 1 to 5
+  // then turns off a random number of lights from 1 to 5
+  for (int i=0; i<random(1,5);i++){
+    strip.setPixelColor(random(0,strip.numPixels()), blueShades[random(0,15)]);
+    strip.show();
+    delay(wait);
+  }
+  for (int i=0; i<random(1,5);i++){
+    strip.setPixelColor(random(0,strip.numPixels()), strip.Color(0,0,0));
+    strip.show();
+    delay(wait);
+  }
+}
+
+void allOn(uint32_t c, int wait) {
+  //Solid color for all lights
+  for(uint16_t i=0; i<strip.numPixels(); i++) {
+    strip.setPixelColor(i, c);
+  }
+  strip.show();
+  delay(wait);
+}
+
+void bluePersonalityAlt(int width, int endLight, int delayTimeOn) {
+  //Mode suggestion:
+    // should make optional constructors
+  int previousLight = 0;
+  int currentLight = 0;
+
+  //Cycle through all the lights
+  for(int i=0; i<endLight; i++) {
+    // If done cycling through list, reset
+
+    currentLight = i;
+    previousLight = currentLight-width;
+
+    if (previousLight<0){
+      previousLight+=endLight;
+    }
+
+    //Turn current light on
+    strip.setPixelColor(currentLight, Wheel((i+110) & 255));
     strip.show();
     delay(delayTimeOn);
+
+    //Turn previous light off
+    strip.setPixelColor(previousLight, strip.Color(0,0,0));
+    strip.show();
+    delay(delayTimeOn);
+  }
+}
+
+void tetris(){
+  //when light reaches the end, it stays lit
+  for (int i = strip.numPixels(); i>0; i--){
+     colorfulPersonalityPart2(1,i,20,0);
   }
 }
 
@@ -298,6 +371,12 @@ void colorfulPersonalityPart2(int width, int endLight, int delayTimeOn, int dela
     x++;
     strip.show();
     delay(delayTimeOn);
+  }
+}
+
+void colorfulPersonalityIncreasing(int delayTime){
+  for (int i =0; i<strip.numPixels();i++){
+  colorfulPersonalityPart2(i,strip.numPixels(),delayTime,0);
   }
 }
 
