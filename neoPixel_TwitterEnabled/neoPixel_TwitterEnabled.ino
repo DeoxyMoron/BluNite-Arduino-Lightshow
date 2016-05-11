@@ -216,9 +216,10 @@ void blueTetrisAlt(){
   }
  delay(2000);
 
+/*
  for (int m = strip.numPixels(); m >=0; m--){
   strip.setPixelColor(m, Wheel((m+0+255) & 255));
-}
+}*/
   
 }
 
